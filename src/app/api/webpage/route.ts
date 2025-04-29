@@ -49,12 +49,12 @@ export async function POST(request: Request) {
     headers.append('Content-Disposition', 'attachment; filename="document.pdf"');
     headers.append('Content-Type', 'application/pdf');
     return new NextResponse(pdfBuffer, { headers });
-
-  } catch (error: any) {
-    let errorResponse: IErrorResponse = { message: error.message } as IErrorResponse
+  }
+  catch (error: unknown) {
+    let errorResponse: IErrorResponse = { message: (error as Error).message } as IErrorResponse
     
-    if ((error as {errors: Array<string>}).errors || !errorResponse?.message) { // yup error
-      errorResponse = {name: "ValidationError", message: `Validation error: ${(error as {errors: Array<string>}).errors}`}
+    if ((error as yup.ValidationError).errors || !errorResponse?.message) { // yup error
+      errorResponse = {name: "ValidationError", message: `Validation error: ${(error as yup.ValidationError).errors}`}
     }
     
     return new NextResponse(JSON.stringify(errorResponse),{ status: 400 })

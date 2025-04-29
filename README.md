@@ -7,6 +7,18 @@
 - Run developer mode
 `yarn dev`
 
+## Test
+
+### UI
+- Open your browser and go to localhost:3000 or vercel deployment URL below
+
+### API
+- Test with API tool like Postman or similar
+- Available endpoint
+  - URL: ~/api/webpage 
+  - Method: [POST]
+  - Body: `{"url": string}`
+
 ## Stack
 - [Next.Js](https://nextjs.org/)
 - [Browserless](https://www.browserless.io/)
