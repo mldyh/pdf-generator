@@ -1,6 +1,5 @@
 import { URL_REGEX } from "@/constants/regex";
 import { IErrorResponse } from "@/interfaces/error";
-import { error } from "console";
 import { NextResponse } from "next/server";
 import puppeteer from 'puppeteer';
 import * as yup from "yup";
@@ -18,7 +17,7 @@ const webpagePostBody = yup.object({
 export async function POST(request: Request) {
   let browser;
   try {
-    const body = await request.json().catch(() => error("Invalid Request"))
+    const body = await request.json().catch(() => Error("Invalid Request"))
     const parsedBody = await webpagePostBody.validate(body, {
       abortEarly: true,
     });
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
     });
     // browser = await puppeteer.launch({headless:false, devtools: true});
     const page = await browser.newPage();
-    await page.goto(url, {waitUntil: 'networkidle0', timeout: 10000});
+    await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 10000});
     
     await page.waitForFunction(imagesHaveLoaded, { timeout: 3000 });
     
@@ -51,8 +50,8 @@ export async function POST(request: Request) {
     headers.append('Content-Type', 'application/pdf');
     return new NextResponse(pdfBuffer, { headers });
 
-  } catch (error: unknown) {
-    let errorResponse: IErrorResponse = error as IErrorResponse;
+  } catch (error: any) {
+    let errorResponse: IErrorResponse = { message: error.message } as IErrorResponse
     
     if ((error as {errors: Array<string>}).errors || !errorResponse?.message) { // yup error
       errorResponse = {name: "ValidationError", message: `Validation error: ${(error as {errors: Array<string>}).errors}`}
@@ -67,8 +66,6 @@ export async function POST(request: Request) {
 }
 
 const imagesHaveLoaded = () => {  
-  window.scrollTo(0, document.body.scrollHeight);
-
   return Array.from(document.images).every((i) => {
     return i.complete || i.loading === 'lazy'
   });

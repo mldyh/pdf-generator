@@ -3,5 +3,5 @@ export const API = async (path: string, body?: BodyInit) => {
         method: 'POST',
         body
     });
-    return response.ok ? await response.blob() : undefined;
+    return response.ok ? await response.blob() : await response.json();
 }

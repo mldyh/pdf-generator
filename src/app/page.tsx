@@ -6,6 +6,7 @@ import { URL_REGEX } from "@/constants/regex";
 
 export default function Home() {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -14,13 +15,16 @@ export default function Home() {
   }
 
   const generatePDF = async (url: string) => {
+    setError(undefined)
     setIsGenerating(true)
     const res = await WebpageService.getContent({url});
-    if (res) {
+    if (!res.message) {
       const link = document.createElement('a');
       link.href = URL.createObjectURL(res);
       link.download = `${url}.pdf`;
       link.click();
+    } else {
+      setError(res.message)
     }
     setIsGenerating(false)
   }
@@ -36,6 +40,9 @@ export default function Home() {
           priority
         />
         <span className="text-white text-center">Drop in a valid URL — I will turn the webpage into a PDF for you</span>
+        {
+          error && <span className="text-red-600 text-center text-xs">{error}</span>
+        }
         <form onSubmit={handleSubmit} className="flex items-center rounded-full border border-white border-4">
           <input 
             required 
